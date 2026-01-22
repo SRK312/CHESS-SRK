@@ -12,7 +12,8 @@ const App: React.FC = () => {
   const [progress, setProgress] = useState<PlayerProgress>(INITIAL_PROGRESS);
   const [redoStack, setRedoStack] = useState<Move[]>([]);
   const [showShareToast, setShowShareToast] = useState(false);
-  
+
+  // Define helper functions before they are used in state/effects
   const createInitialState = (): GameState => ({
     board: JSON.parse(JSON.stringify(INITIAL_BOARD)),
     turn: 'w',
@@ -27,47 +28,6 @@ const App: React.FC = () => {
     },
     enPassantTarget: null
   });
-
-  const [gameState, setGameState] = useState<GameState>(createInitialState());
-
-  // Handle URL Sharing / Invitation Link
-  useEffect(() => {
-    const hash = window.location.hash.substring(1);
-    if (hash) {
-      try {
-        const decoded = atob(hash);
-        const moveStrings = decoded.split('|').filter(Boolean);
-        let newState = createInitialState();
-        
-        moveStrings.forEach(moveStr => {
-          const [f, t] = moveStr.split('-');
-          const from = { row: parseInt(f[1]), col: f.charCodeAt(0) - 97 };
-          const to = { row: parseInt(t[1]), col: t.charCodeAt(0) - 97 };
-          const piece = newState.board[from.row][from.col];
-          
-          if (piece) {
-            const legalMoves = ChessEngine.getLegalMoves(newState, from);
-            const valid = legalMoves.find(m => m.to.row === to.row && m.to.col === to.col);
-            if (valid) {
-              newState = processMove(newState, valid);
-            }
-          }
-        });
-        
-        setGameState(newState);
-        setScreen(Screen.PLAYING);
-      } catch (e) {
-        console.error("Failed to parse invitation link", e);
-      }
-    }
-    
-    const saved = loadProgress();
-    setProgress(prev => ({ ...prev, ...saved }));
-  }, []);
-
-  useEffect(() => {
-    saveProgress(progress);
-  }, [progress]);
 
   const processMove = (state: GameState, move: Move): GameState => {
     const nextBoard = ChessEngine.applyMove(state.board, move);
@@ -100,6 +60,49 @@ const App: React.FC = () => {
     const status = ChessEngine.getGameStatus(nextState);
     return { ...nextState, ...status };
   };
+
+  const [gameState, setGameState] = useState<GameState>(createInitialState);
+
+  // Handle URL Sharing / Invitation Link
+  useEffect(() => {
+    const hash = window.location.hash.substring(1);
+    if (hash) {
+      try {
+        const decoded = atob(hash);
+        const moveStrings = decoded.split('|').filter(Boolean);
+        let newState = createInitialState();
+        
+        moveStrings.forEach(moveStr => {
+          const parts = moveStr.split('-');
+          if (parts.length !== 2) return;
+          const [f, t] = parts;
+          const from = { row: parseInt(f[1]), col: f.charCodeAt(0) - 97 };
+          const to = { row: parseInt(t[1]), col: t.charCodeAt(0) - 97 };
+          const piece = newState.board[from.row]?.[from.col];
+          
+          if (piece) {
+            const legalMoves = ChessEngine.getLegalMoves(newState, from);
+            const valid = legalMoves.find(m => m.to.row === to.row && m.to.col === to.col);
+            if (valid) {
+              newState = processMove(newState, valid);
+            }
+          }
+        });
+        
+        setGameState(newState);
+        setScreen(Screen.PLAYING);
+      } catch (e) {
+        console.error("Failed to parse invitation link", e);
+      }
+    }
+    
+    const saved = loadProgress();
+    setProgress(prev => ({ ...prev, ...saved }));
+  }, []);
+
+  useEffect(() => {
+    saveProgress(progress);
+  }, [progress]);
 
   const handleMove = (move: Move) => {
     const legalMoves = ChessEngine.getLegalMoves(gameState, move.from);
@@ -184,7 +187,6 @@ const App: React.FC = () => {
             coins={progress.coins}
           />
           
-          {/* Share Button UI */}
           <div className="fixed top-8 right-40 z-50">
             <button 
               onClick={handleShare}
@@ -199,7 +201,6 @@ const App: React.FC = () => {
             </button>
           </div>
 
-          {/* Share Toast Notification */}
           <div className={`fixed bottom-32 left-1/2 -translate-x-1/2 z-[60] transition-all duration-500 transform ${showShareToast ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0 pointer-events-none'}`}>
              <div className="bg-slate-950 text-white px-8 py-4 rounded-full shadow-2xl flex items-center gap-4 border border-white/10 backdrop-blur-md">
                 <div className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
@@ -215,7 +216,7 @@ const App: React.FC = () => {
                   </h1>
                   <p className="text-slate-400 uppercase tracking-[0.8em] text-[10px] font-black">
                     {gameState.checkmate 
-                      ? `${gameState.turn === 'w' ? 'RUBY LEGION' : 'IVORY ORDER'} SUPREME` 
+                      ? `${gameState.turn === 'w' ? 'EMBER LEGION' : 'GLACIAL ORDER'} SUPREME` 
                       : 'TACTICAL STALEMATE REACHED'}
                   </p>
                   <div className="flex flex-col gap-4">
@@ -252,7 +253,7 @@ const App: React.FC = () => {
       )}
 
       {screen === Screen.ARENAS && (
-        <div className="p-10 md:p-24 overflow-y-auto h-full bg-slate-50 animate-in slide-in-from-right duration-700">
+        <div className="p-10 md:p-24 overflow-y-auto h-full bg-slate-50">
            <button onClick={() => setScreen(Screen.HOME)} className="mb-16 text-slate-400 hover:text-slate-950 uppercase tracking-[0.5em] text-[10px] font-black flex items-center gap-3">
              <span className="text-xl">←</span> Return
            </button>

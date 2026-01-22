@@ -56,43 +56,27 @@ const ChessBoard: React.FC<ChessBoardProps> = ({ arena, onMove, onUndo, onRedo, 
 
     const bgGrad = ctx.createRadialGradient(512, 512, 0, 512, 512, 512);
     bgGrad.addColorStop(0, '#ffffff');
-    bgGrad.addColorStop(1, '#d1d5db');
+    bgGrad.addColorStop(1, '#e2e8f0');
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, 1024, 1024);
 
-    ctx.strokeStyle = 'rgba(0,0,0,0.03)';
-    ctx.lineWidth = 1;
-    for (let i = 0; i < 512; i += 4) {
-      ctx.beginPath();
-      ctx.arc(512, 512, i, 0, Math.PI * 2);
-      ctx.stroke();
-    }
-
     ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 18;
-    ctx.beginPath();
-    ctx.arc(512, 512, 475, 0, Math.PI * 2);
-    ctx.stroke();
-
-    const faceShadow = ctx.createRadialGradient(512, 512, 440, 512, 512, 480);
-    faceShadow.addColorStop(0, 'rgba(0,0,0,0)');
-    faceShadow.addColorStop(1, 'rgba(0,0,0,0.2)');
-    ctx.fillStyle = faceShadow;
+    ctx.lineWidth = 24;
     ctx.beginPath();
     ctx.arc(512, 512, 480, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.stroke();
 
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.font = '740px serif';
+    ctx.font = 'bold 740px serif';
 
     const solidMap: Record<string, string> = { 'p': '♟', 'r': '♜', 'n': '♞', 'b': '♝', 'q': '♛', 'k': '♚' };
     const outlineMap: Record<string, string> = { 'p': '♙', 'r': '♖', 'n': '♘', 'b': '♗', 'q': '♕', 'k': '♔' };
     const symbol = style === 'solid' ? solidMap[type] : outlineMap[type];
 
-    ctx.fillStyle = 'rgba(0,0,0,0.4)';
-    ctx.fillText(symbol || '♟', 520, 520);
-    ctx.fillStyle = '#000000';
+    ctx.fillStyle = 'rgba(0,0,0,0.1)';
+    ctx.fillText(symbol || '♟', 525, 525);
+    ctx.fillStyle = '#0f172a';
     ctx.fillText(symbol || '♟', 512, 512);
 
     const texture = new THREE.CanvasTexture(canvas);
@@ -106,9 +90,9 @@ const ChessBoard: React.FC<ChessBoardProps> = ({ arena, onMove, onUndo, onRedo, 
     const reedingTexture = createReedingTexture();
     
     const bodyMat = new THREE.MeshPhysicalMaterial({ 
-      color: 0x0f172a, 
-      metalness: 0.95, 
-      roughness: 0.1, 
+      color: 0x1e293b, 
+      metalness: 0.9, 
+      roughness: 0.15, 
       clearcoat: 1.0,
       clearcoatRoughness: 0.05,
       bumpMap: reedingTexture,
@@ -117,22 +101,23 @@ const ChessBoard: React.FC<ChessBoardProps> = ({ arena, onMove, onUndo, onRedo, 
 
     const faceMat = new THREE.MeshPhysicalMaterial({ 
       map: faceTexture, 
-      roughness: 0.15, 
-      metalness: 0.2, 
-      clearcoat: 0.9,
+      roughness: 0.1, 
+      metalness: 0.3, 
+      clearcoat: 0.8,
       reflectivity: 1.0
     });
 
+    // Detailed numismatic profile with recessed center and raised rim
     const profilePoints = [
       new THREE.Vector2(0, -0.06),
-      new THREE.Vector2(0.44, -0.06),
-      new THREE.Vector2(0.44, -0.1),
-      new THREE.Vector2(0.47, -0.1),
+      new THREE.Vector2(0.42, -0.06),
+      new THREE.Vector2(0.42, -0.1),
+      new THREE.Vector2(0.48, -0.1),
       new THREE.Vector2(0.5, -0.07),
       new THREE.Vector2(0.5, 0.07),
-      new THREE.Vector2(0.47, 0.1),
-      new THREE.Vector2(0.44, 0.1),
-      new THREE.Vector2(0.44, 0.06),
+      new THREE.Vector2(0.48, 0.1),
+      new THREE.Vector2(0.42, 0.1),
+      new THREE.Vector2(0.42, 0.06),
       new THREE.Vector2(0, 0.06),
     ];
     
@@ -140,7 +125,7 @@ const ChessBoard: React.FC<ChessBoardProps> = ({ arena, onMove, onUndo, onRedo, 
     const body = new THREE.Mesh(bodyGeo, bodyMat);
     coinGroup.add(body);
 
-    const faceGeo = new THREE.CircleGeometry(0.44, 64);
+    const faceGeo = new THREE.CircleGeometry(0.42, 64);
     const topFace = new THREE.Mesh(faceGeo, faceMat);
     topFace.position.y = 0.061;
     topFace.rotation.x = -Math.PI / 2;
@@ -165,34 +150,31 @@ const ChessBoard: React.FC<ChessBoardProps> = ({ arena, onMove, onUndo, onRedo, 
     const group = new THREE.Group();
     const isWhite = piece.color === 'w';
     
-    // FIRE vs ICE Materials
     const material = isWhite 
       ? new THREE.MeshPhysicalMaterial({ 
-          // ICE THEME
           color: 0xffffff,
           metalness: 0.1,
           roughness: 0.15,
-          transmission: 0.6, // Translucent glacial look
-          thickness: 0.5,
-          ior: 1.45,
+          transmission: 0.7,
+          thickness: 0.6,
+          ior: 1.5,
           clearcoat: 1.0,
-          clearcoatRoughness: 0.05,
+          clearcoatRoughness: 0.02,
           reflectivity: 1.0,
-          emissive: 0x7dd3fc, // Soft blue ice glow
-          emissiveIntensity: 0.4,
+          emissive: 0xbae6fd,
+          emissiveIntensity: 0.3,
           transparent: true,
           opacity: 1.0
         })
       : new THREE.MeshPhysicalMaterial({
-          // FIRE THEME
-          color: 0x0c0a09, // Obsidian/Volcanic base
-          metalness: 0.8,
-          roughness: 0.45,
+          color: 0x0c0a09,
+          metalness: 0.9,
+          roughness: 0.4,
           clearcoat: 1.0,
-          clearcoatRoughness: 0.2,
-          reflectivity: 0.5,
-          emissive: 0xf97316, // Vibrant ember/fire glow
-          emissiveIntensity: 1.8,
+          clearcoatRoughness: 0.1,
+          reflectivity: 0.8,
+          emissive: 0xf97316,
+          emissiveIntensity: 2.0,
           transparent: true,
           opacity: 1.0
         });
@@ -254,7 +236,7 @@ const ChessBoard: React.FC<ChessBoardProps> = ({ arena, onMove, onUndo, onRedo, 
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.25;
+    renderer.toneMappingExposure = 1.3;
     rendererRef.current = renderer;
     containerRef.current.appendChild(renderer.domElement);
 
@@ -270,11 +252,11 @@ const ChessBoard: React.FC<ChessBoardProps> = ({ arena, onMove, onUndo, onRedo, 
       const coin = createDetailedCoin(type, style);
       const angle = (i / 12) * Math.PI * 2;
       const dist = 30 + Math.random() * 5;
-      coin.position.set(Math.cos(angle) * dist, 5 + Math.random() * 7, Math.sin(angle) * dist);
+      coin.position.set(Math.cos(angle) * dist, 6 + Math.random() * 8, Math.sin(angle) * dist);
       coin.userData = { 
-        rotSpeed: 0.25 + Math.random() * 0.4, 
+        rotSpeed: 0.3 + Math.random() * 0.5, 
         floatOffset: Math.random() * Math.PI * 2, 
-        floatSpeed: 0.12 + Math.random() * 0.18 
+        floatSpeed: 0.15 + Math.random() * 0.2 
       };
       coinsGroup.current.add(coin);
     }
@@ -295,9 +277,9 @@ const ChessBoard: React.FC<ChessBoardProps> = ({ arena, onMove, onUndo, onRedo, 
       for (let c = 0; c < 8; c++) {
         const isLight = (r + c) % 2 !== 0;
         const tileMat = new THREE.MeshPhysicalMaterial({ 
-          color: isLight ? 0xf0f9ff : 0x0c0a09, // Ice-tinted vs Deep Obsidian
+          color: isLight ? 0xe0f2fe : 0x0c0a09,
           metalness: 0.1, 
-          roughness: 0.25, 
+          roughness: 0.3, 
           reflectivity: 0.8 
         });
         const tile = new THREE.Mesh(new THREE.BoxGeometry(TILE_SIZE, BOARD_THICKNESS, TILE_SIZE), tileMat);
@@ -308,24 +290,18 @@ const ChessBoard: React.FC<ChessBoardProps> = ({ arena, onMove, onUndo, onRedo, 
       }
     }
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+    scene.add(new THREE.AmbientLight(0xffffff, 0.8));
     
-    const keyLight = new THREE.DirectionalLight(0xffffff, 2.5);
-    keyLight.position.set(50, 80, 50);
+    const keyLight = new THREE.DirectionalLight(0xffffff, 2.6);
+    keyLight.position.set(40, 70, 40);
     keyLight.castShadow = true;
     keyLight.shadow.mapSize.set(2048, 2048);
+    keyLight.shadow.bias = -0.0001;
     scene.add(keyLight);
 
-    const fillLight = new THREE.DirectionalLight(0xf0f9ff, 0.8);
-    fillLight.position.set(-50, 30, -50);
+    const fillLight = new THREE.DirectionalLight(0xf0f9ff, 0.7);
+    fillLight.position.set(-40, 30, -40);
     scene.add(fillLight);
-
-    // Rim light to make piece silhouettes pop
-    const rimLight = new THREE.SpotLight(0xffffff, 25.0);
-    rimLight.position.set(0, 45, -85);
-    rimLight.angle = 0.65;
-    rimLight.penumbra = 0.4;
-    scene.add(rimLight);
 
     const clock = new THREE.Clock();
     let animId: number;
@@ -334,34 +310,32 @@ const ChessBoard: React.FC<ChessBoardProps> = ({ arena, onMove, onUndo, onRedo, 
       animId = requestAnimationFrame(animate);
       const delta = clock.getDelta();
       const time = clock.getElapsedTime();
-      camera.position.x = Math.sin(time * 0.04) * 1.8;
-      camera.lookAt(0, 0, 0);
-
+      
       coinsGroup.current.children.forEach((coin) => {
         coin.rotation.y += delta * coin.userData.rotSpeed;
-        coin.position.y += Math.sin(time * coin.userData.floatSpeed + coin.userData.floatOffset) * 0.012;
+        coin.position.y += Math.sin(time * coin.userData.floatSpeed + coin.userData.floatOffset) * 0.015;
       });
 
       pieceMeshes.current.forEach((mesh, id) => {
         if (mesh.userData.isCaptured) {
           mesh.scale.multiplyScalar(0.9);
-          mesh.position.y += delta * 2.5;
+          mesh.position.y += delta * 3.0;
           mesh.traverse(child => {
             if (child instanceof THREE.Mesh && child.material) {
               const mat = child.material as THREE.MeshPhysicalMaterial;
-              if (mat.opacity > 0) mat.opacity -= delta * 1.8;
+              if (mat.opacity > 0) mat.opacity -= delta * 2.0;
             }
           });
           if (mesh.scale.x < 0.01) { scene.remove(mesh); pieceMeshes.current.delete(id); }
         } else {
           const target = mesh.userData.targetPos;
           const isSelected = mesh.userData.isSelected;
-          const targetY = isSelected ? target.y + 0.8 : target.y;
-          mesh.position.x = THREE.MathUtils.lerp(mesh.position.x, target.x, 0.12);
-          mesh.position.z = THREE.MathUtils.lerp(mesh.position.z, target.z, 0.12);
-          mesh.position.y = THREE.MathUtils.lerp(mesh.position.y, targetY, 0.15);
-          if (isSelected) mesh.rotation.y += delta * 2.5;
-          else mesh.rotation.y = THREE.MathUtils.lerp(mesh.rotation.y, 0, 0.1);
+          const targetY = isSelected ? target.y + 1.0 : target.y;
+          mesh.position.x = THREE.MathUtils.lerp(mesh.position.x, target.x, 0.15);
+          mesh.position.z = THREE.MathUtils.lerp(mesh.position.z, target.z, 0.15);
+          mesh.position.y = THREE.MathUtils.lerp(mesh.position.y, targetY, 0.2);
+          if (isSelected) mesh.rotation.y += delta * 3.0;
+          else mesh.rotation.y = THREE.MathUtils.lerp(mesh.rotation.y, 0, 0.15);
         }
       });
       renderer.render(scene, camera);
@@ -453,8 +427,8 @@ const ChessBoard: React.FC<ChessBoardProps> = ({ arena, onMove, onUndo, onRedo, 
       const legalMoves = ChessEngine.getLegalMoves(gameState, selectedSquare);
       legalMoves.forEach(m => {
         const isCapture = !!gameState.board[m.to.row][m.to.col];
-        const geo = new THREE.RingGeometry(isCapture ? 0.4 * TILE_SIZE : 0.1 * TILE_SIZE, isCapture ? 0.5 * TILE_SIZE : 0.25 * TILE_SIZE, 32);
-        const mat = new THREE.MeshBasicMaterial({ color: isCapture ? 0xf43f5e : 0x3b82f6, transparent: true, opacity: 0.8, side: THREE.DoubleSide });
+        const geo = new THREE.RingGeometry(isCapture ? 0.45 * TILE_SIZE : 0.15 * TILE_SIZE, isCapture ? 0.55 * TILE_SIZE : 0.3 * TILE_SIZE, 32);
+        const mat = new THREE.MeshBasicMaterial({ color: isCapture ? 0xf43f5e : 0x22d3ee, transparent: true, opacity: 0.9, side: THREE.DoubleSide });
         const mesh = new THREE.Mesh(geo, mat);
         mesh.rotation.x = -Math.PI / 2;
         mesh.position.set(m.to.col * TILE_SIZE - BOARD_HALF, PIECE_BASE_Y + 0.1, m.to.row * TILE_SIZE - BOARD_HALF);
