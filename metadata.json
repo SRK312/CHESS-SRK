@@ -1,0 +1,5 @@
+{
+  "name": "Elemental Clash Chess",
+  "description": "A cinematic Fire vs Ice themed 3D chess game built with Three.js and React.",
+  "requestFramePermissions": []
+}
