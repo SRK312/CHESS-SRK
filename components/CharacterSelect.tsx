@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Screen, PlayerProgress, Character } from '../types';
-import { CHARACTERS } from '../constants';
+import { Screen, PlayerProgress, Character } from '../types.ts';
+import { CHARACTERS } from '../constants.ts';
 
 interface CharacterSelectProps {
   progress: PlayerProgress;

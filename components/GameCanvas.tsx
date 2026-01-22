@@ -1,7 +1,8 @@
 
 import React, { useRef, useEffect } from 'react';
 import * as THREE from 'three';
-import { Blade, GameStats } from '../types';
+// Fixed missing member errors by updating the import source to types.ts
+import { Blade, GameStats } from '../types.ts';
 
 interface GameCanvasProps {
   blade: Blade;

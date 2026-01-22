@@ -1,6 +1,6 @@
 
-import { PlayerProgress } from '../types';
-import { INITIAL_PROGRESS } from '../constants';
+import { PlayerProgress } from '../types.ts';
+import { INITIAL_PROGRESS } from '../constants.ts';
 
 const SAVE_KEY = 'chess_clash_elemental_save';
 

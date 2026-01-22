@@ -1,13 +1,12 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Screen, PlayerProgress, GameState, Move, Color } from './types';
-import { INITIAL_PROGRESS, INITIAL_BOARD, ARENAS } from './constants';
-import { loadProgress, saveProgress } from './services/storage';
-import { ChessEngine } from './services/ChessEngine';
-import MainMenu from './components/MainMenu';
-import ChessBoard from './components/ChessBoard';
+import { Screen, PlayerProgress, GameState, Move, Color } from './types.ts';
+import { INITIAL_PROGRESS, INITIAL_BOARD, ARENAS } from './constants.ts';
+import { loadProgress, saveProgress } from './services/storage.ts';
+import { ChessEngine } from './services/ChessEngine.ts';
+import MainMenu from './components/MainMenu.tsx';
+import ChessBoard from './components/ChessBoard.tsx';
 
-// Logic moved outside the component to prevent initialization cycles and hoisting errors
 function createInitialState(): GameState {
   return {
     board: JSON.parse(JSON.stringify(INITIAL_BOARD)),
@@ -64,7 +63,6 @@ const App: React.FC = () => {
   const [showShareToast, setShowShareToast] = useState(false);
   const [gameState, setGameState] = useState<GameState>(createInitialState);
 
-  // Handle Invitation Link safely
   useEffect(() => {
     const hash = window.location.hash.substring(1);
     if (!hash) return;
@@ -79,7 +77,6 @@ const App: React.FC = () => {
         if (parts.length !== 2) return;
         
         const [f, t] = parts;
-        // Internal index is 0-7, chess rank is 1-8
         const from = { row: parseInt(f[1]) - 1, col: f.charCodeAt(0) - 97 };
         const to = { row: parseInt(t[1]) - 1, col: t.charCodeAt(0) - 97 };
         

@@ -2,7 +2,9 @@
 export enum Screen {
   HOME = 'HOME',
   ARENAS = 'ARENAS',
-  PLAYING = 'PLAYING'
+  PLAYING = 'PLAYING',
+  SHOP = 'SHOP',
+  CHARACTERS = 'CHARACTERS'
 }
 
 export type PieceType = 'p' | 'r' | 'n' | 'b' | 'q' | 'k';
@@ -37,7 +39,16 @@ export interface Arena {
   skyColor: number;
 }
 
-// Fix: Added GameStats for GameCanvas
+// Added Blade interface for the armory and game canvas
+export interface Blade {
+  id: string;
+  name: string;
+  cost: number;
+  color: string;
+  trailWidth: number;
+}
+
+// Added GameStats interface for game completion tracking
 export interface GameStats {
   score: number;
   combo: number;
@@ -45,26 +56,17 @@ export interface GameStats {
   fruitsSliced: number;
 }
 
-// Fix: Added Blade for Shop and GameCanvas
-export interface Blade {
-  id: string;
-  name: string;
-  color: string;
-  trailWidth: number;
-  cost: number;
-}
-
-// Fix: Added Character for CharacterSelect
+// Added Character interface for the archer selection
 export interface Character {
   id: string;
   name: string;
   ability: string;
   description: string;
+  cost: number;
   passiveBonus: {
     windHandling: number;
     steadiness: number;
   };
-  cost: number;
 }
 
 export interface PlayerProgress {
@@ -74,7 +76,7 @@ export interface PlayerProgress {
   coins: number;
   unlockedArenas: string[];
   selectedArena: string;
-  // Fix: Added missing properties for character and blade selection
+  // Added fields to track unlocked and selected characters and blades
   unlockedCharacters: string[];
   selectedCharacter: string;
   unlockedBlades: string[];

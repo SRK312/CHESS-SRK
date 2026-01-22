@@ -1,8 +1,8 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
-import { GameState, Piece, Square, Move, Arena } from '../types';
-import { ChessEngine } from '../services/ChessEngine';
+import { GameState, Piece, Square, Move, Arena } from '../types.ts';
+import { ChessEngine } from '../services/ChessEngine.ts';
 
 interface ChessBoardProps {
   arena: Arena;
@@ -107,7 +107,6 @@ const ChessBoard: React.FC<ChessBoardProps> = ({ arena, onMove, onUndo, onRedo, 
       reflectivity: 1.0
     });
 
-    // Detailed numismatic profile with recessed center and raised rim
     const profilePoints = [
       new THREE.Vector2(0, -0.06),
       new THREE.Vector2(0.42, -0.06),

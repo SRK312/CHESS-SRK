@@ -1,7 +1,6 @@
 
-import { Arena, PlayerProgress, Piece, Character, Blade, PieceType } from './types';
+import { Arena, PlayerProgress, Piece, PieceType, Blade, Character } from './types.ts';
 
-// Fix: Updated type from any to PieceType
 const generatePiece = (color: 'w' | 'b', type: PieceType, index: number): Piece => ({
   id: `${color}-${type}-${index}`,
   color,
@@ -31,40 +30,40 @@ export const ARENAS: Arena[] = [
   { id: 'glass', name: 'Glass Fortress', color: '#0ea5e9', description: 'A crystalline tower above the sea of clouds.', skyColor: 0xf0f9ff }
 ];
 
-// Fix: Added CHARACTERS for CharacterSelect
-export const CHARACTERS: Character[] = [
-  {
-    id: 'swift',
-    name: 'Swift Wind',
-    ability: 'Gale Force',
-    description: 'A master of the winds who can predict any gust.',
-    passiveBonus: { windHandling: 0.9, steadiness: 0.5 },
-    cost: 0
-  },
-  {
-    id: 'steady',
-    name: 'Steady Eye',
-    ability: 'Focus Point',
-    description: 'Rare focus allows for unparalleled accuracy.',
-    passiveBonus: { windHandling: 0.4, steadiness: 0.9 },
-    cost: 500
-  },
-  {
-    id: 'shadow',
-    name: 'Shadow Stalker',
-    ability: 'Umbral Veil',
-    description: 'Moves unseen through the darkest terrains.',
-    passiveBonus: { windHandling: 0.6, steadiness: 0.6 },
-    cost: 1200
-  }
+// Added BLADES constant for the armory shop
+export const BLADES: Blade[] = [
+  { id: 'basic', name: 'Training Blade', cost: 0, color: '#94a3b8', trailWidth: 1.0 },
+  { id: 'sky', name: 'Sky Piercer', cost: 500, color: '#0ea5e9', trailWidth: 1.5 },
+  { id: 'fire', name: 'Embers Edge', cost: 1200, color: '#f43f5e', trailWidth: 2.0 },
+  { id: 'void', name: 'Void Reaver', cost: 2500, color: '#6366f1', trailWidth: 2.5 }
 ];
 
-// Fix: Added BLADES for Shop
-export const BLADES: Blade[] = [
-  { id: 'steel', name: 'Forged Steel', color: '#94a3b8', trailWidth: 1.0, cost: 0 },
-  { id: 'plasma', name: 'Plasma Edge', color: '#f43f5e', trailWidth: 2.5, cost: 1000 },
-  { id: 'void', name: 'Void Slicer', color: '#a855f7', trailWidth: 1.8, cost: 600 },
-  { id: 'jade', name: 'Jade Katana', color: '#10b981', trailWidth: 1.5, cost: 350 }
+// Added CHARACTERS constant for selection
+export const CHARACTERS: Character[] = [
+  { 
+    id: 'kaito', 
+    name: 'Kaito', 
+    ability: 'Wind Walker', 
+    description: 'A master of the high winds.', 
+    cost: 0, 
+    passiveBonus: { windHandling: 0.8, steadiness: 0.4 } 
+  },
+  { 
+    id: 'elara', 
+    name: 'Elara', 
+    ability: 'Storm Seer', 
+    description: 'Precision in the eye of the storm.', 
+    cost: 1000, 
+    passiveBonus: { windHandling: 0.5, steadiness: 0.9 } 
+  },
+  { 
+    id: 'jorin', 
+    name: 'Jorin', 
+    ability: 'Mountain Heart', 
+    description: 'Steady as the ancient stone.', 
+    cost: 1500, 
+    passiveBonus: { windHandling: 0.3, steadiness: 1.0 } 
+  }
 ];
 
 export const INITIAL_PROGRESS: PlayerProgress = {
@@ -74,9 +73,9 @@ export const INITIAL_PROGRESS: PlayerProgress = {
   unlockedArenas: ['celestial', 'alabaster', 'glass'],
   selectedArena: 'celestial',
   coins: 100,
-  // Fix: Added initial fields for characters and blades
-  unlockedCharacters: ['swift'],
-  selectedCharacter: 'swift',
-  unlockedBlades: ['steel'],
-  selectedBlade: 'steel'
+  // Added default values for character and blade progression
+  unlockedCharacters: ['kaito'],
+  selectedCharacter: 'kaito',
+  unlockedBlades: ['basic'],
+  selectedBlade: 'basic'
 };

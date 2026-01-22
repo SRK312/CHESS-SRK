@@ -1,5 +1,5 @@
 
-import { Piece, Square, Move, Color, GameState } from '../types';
+import { Piece, Square, Move, Color, GameState } from '../types.ts';
 
 export class ChessEngine {
   static isSquareOnBoard(s: Square) {

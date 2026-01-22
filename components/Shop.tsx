@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Screen, PlayerProgress, Blade } from '../types';
-import { BLADES } from '../constants';
+import { Screen, PlayerProgress, Blade } from '../types.ts';
+import { BLADES } from '../constants.ts';
 
 interface ShopProps {
   progress: PlayerProgress;
