@@ -1,7 +1,11 @@
 
-import { Arena, PlayerProgress, Piece, PieceType, Blade, Character } from './types.ts';
+import { Arena, PlayerProgress, Piece, PieceType, Color, Blade, Character } from './types.ts';
 
-const generatePiece = (color: 'w' | 'b', type: PieceType, index: number): Piece => ({
+/**
+ * Helper to generate chess pieces with a specific color and type.
+ * Fixes "Cannot find name 'Color'" by adding it to the import list.
+ */
+const generatePiece = (color: Color, type: PieceType, index: number): Piece => ({
   id: `${color}-${type}-${index}`,
   color,
   type
@@ -30,41 +34,50 @@ export const ARENAS: Arena[] = [
   { id: 'glass', name: 'Glass Fortress', color: '#0ea5e9', description: 'A crystalline tower above the sea of clouds.', skyColor: 0xf0f9ff }
 ];
 
-// Added BLADES constant for the armory shop
+/**
+ * Added BLADES constant used by the Shop component.
+ */
 export const BLADES: Blade[] = [
-  { id: 'basic', name: 'Training Blade', cost: 0, color: '#94a3b8', trailWidth: 1.0 },
-  { id: 'sky', name: 'Sky Piercer', cost: 500, color: '#0ea5e9', trailWidth: 1.5 },
-  { id: 'fire', name: 'Embers Edge', cost: 1200, color: '#f43f5e', trailWidth: 2.0 },
-  { id: 'void', name: 'Void Reaver', cost: 2500, color: '#6366f1', trailWidth: 2.5 }
+  { id: 'standard', name: 'Steel Edge', color: '#64748b', cost: 0, trailWidth: 1.0 },
+  { id: 'neon', name: 'Neon Saber', color: '#0ea5e9', cost: 500, trailWidth: 1.5 },
+  { id: 'crimson', name: 'Crimson Fury', color: '#ef4444', cost: 1000, trailWidth: 2.0 },
+  { id: 'void', name: 'Void Reaver', color: '#a855f7', cost: 2500, trailWidth: 3.0 }
 ];
 
-// Added CHARACTERS constant for selection
+/**
+ * Added CHARACTERS constant used by the CharacterSelect component.
+ */
 export const CHARACTERS: Character[] = [
+  { 
+    id: 'robin', 
+    name: 'Robin', 
+    ability: 'Wind Whisperer', 
+    description: 'A master of the forest who can predict the subtlest breeze.', 
+    passiveBonus: { windHandling: 0.8, steadiness: 0.4 }, 
+    cost: 0 
+  },
+  { 
+    id: 'evelyn', 
+    name: 'Evelyn', 
+    ability: 'Steady Hand', 
+    description: 'An elite sharpshooter with nerves of cold steel.', 
+    passiveBonus: { windHandling: 0.4, steadiness: 0.9 }, 
+    cost: 1500 
+  },
   { 
     id: 'kaito', 
     name: 'Kaito', 
-    ability: 'Wind Walker', 
-    description: 'A master of the high winds.', 
-    cost: 0, 
-    passiveBonus: { windHandling: 0.8, steadiness: 0.4 } 
-  },
-  { 
-    id: 'elara', 
-    name: 'Elara', 
-    ability: 'Storm Seer', 
-    description: 'Precision in the eye of the storm.', 
-    cost: 1000, 
-    passiveBonus: { windHandling: 0.5, steadiness: 0.9 } 
-  },
-  { 
-    id: 'jorin', 
-    name: 'Jorin', 
-    ability: 'Mountain Heart', 
-    description: 'Steady as the ancient stone.', 
-    cost: 1500, 
-    passiveBonus: { windHandling: 0.3, steadiness: 1.0 } 
+    ability: 'Focus Burst', 
+    description: 'A samurai archer who finds stillness in the eye of the storm.', 
+    passiveBonus: { windHandling: 0.6, steadiness: 0.6 }, 
+    cost: 3000 
   }
 ];
+
+/**
+ * Added GRAVITY constant used by the ArcheryScene component.
+ */
+export const GRAVITY = -9.8;
 
 export const INITIAL_PROGRESS: PlayerProgress = {
   wins: 0,
@@ -73,9 +86,11 @@ export const INITIAL_PROGRESS: PlayerProgress = {
   unlockedArenas: ['celestial', 'alabaster', 'glass'],
   selectedArena: 'celestial',
   coins: 100,
-  // Added default values for character and blade progression
-  unlockedCharacters: ['kaito'],
-  selectedCharacter: 'kaito',
-  unlockedBlades: ['basic'],
-  selectedBlade: 'basic'
+  /**
+   * Added initial values for Character and Blade selection.
+   */
+  unlockedCharacters: ['robin'],
+  selectedCharacter: 'robin',
+  unlockedBlades: ['standard'],
+  selectedBlade: 'standard'
 };

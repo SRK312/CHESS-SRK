@@ -7,6 +7,9 @@ import { ChessEngine } from './services/ChessEngine.ts';
 import MainMenu from './components/MainMenu.tsx';
 import ChessBoard from './components/ChessBoard.tsx';
 
+/**
+ * Initialize game state with required properties for Chess and Archery components.
+ */
 function createInitialState(): GameState {
   return {
     board: JSON.parse(JSON.stringify(INITIAL_BOARD)),
@@ -20,7 +23,15 @@ function createInitialState(): GameState {
       w: { kingSide: true, queenSide: true },
       b: { kingSide: true, queenSide: true }
     },
-    enPassantTarget: null
+    enPassantTarget: null,
+    /**
+     * Added properties for game compatibility with ArcheryScene logic.
+     */
+    currentDistance: 20,
+    wind: { 
+      speed: 0, 
+      direction: { x: 0, y: 0, z: 0 } 
+    }
   };
 }
 
@@ -64,43 +75,6 @@ const App: React.FC = () => {
   const [gameState, setGameState] = useState<GameState>(createInitialState);
 
   useEffect(() => {
-    const hash = window.location.hash.substring(1);
-    if (!hash) return;
-
-    try {
-      const decoded = atob(decodeURIComponent(hash));
-      const moveStrings = decoded.split('|').filter(Boolean);
-      let newState = createInitialState();
-      
-      moveStrings.forEach(moveStr => {
-        const parts = moveStr.split('-');
-        if (parts.length !== 2) return;
-        
-        const [f, t] = parts;
-        const from = { row: parseInt(f[1]) - 1, col: f.charCodeAt(0) - 97 };
-        const to = { row: parseInt(t[1]) - 1, col: t.charCodeAt(0) - 97 };
-        
-        if (from.row >= 0 && from.row < 8 && from.col >= 0 && from.col < 8) {
-          const piece = newState.board[from.row][from.col];
-          if (piece) {
-            const legalMoves = ChessEngine.getLegalMoves(newState, from);
-            const valid = legalMoves.find(m => m.to.row === to.row && m.to.col === to.col);
-            if (valid) {
-              newState = processMove(newState, valid);
-            }
-          }
-        }
-      });
-      
-      setGameState(newState);
-      setScreen(Screen.PLAYING);
-    } catch (e) {
-      console.error("Link parsing failed:", e);
-      window.location.hash = '';
-    }
-  }, []);
-
-  useEffect(() => {
     saveProgress(progress);
   }, [progress]);
 
@@ -136,7 +110,6 @@ const App: React.FC = () => {
     const url = `${window.location.origin}${window.location.pathname}#${encoded}`;
     
     navigator.clipboard.writeText(url).then(() => {
-      window.location.hash = encoded;
       setShowShareToast(true);
       setTimeout(() => setShowShareToast(false), 3000);
     });
@@ -164,7 +137,6 @@ const App: React.FC = () => {
   const resetGame = () => { 
     setGameState(createInitialState()); 
     setRedoStack([]);
-    window.location.hash = '';
   };
 
   const selectedArena = ARENAS.find(a => a.id === progress.selectedArena) || ARENAS[0];
@@ -204,49 +176,30 @@ const App: React.FC = () => {
           <div className={`fixed bottom-32 left-1/2 -translate-x-1/2 z-[60] transition-all duration-500 transform ${showShareToast ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0 pointer-events-none'}`}>
              <div className="bg-slate-950 text-white px-8 py-4 rounded-full shadow-2xl flex items-center gap-4 border border-white/10 backdrop-blur-md">
                 <div className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
-                <span className="text-[10px] font-black uppercase tracking-[0.4em]">Invitation Link Copied!</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.4em]">Link Copied to Clipboard</span>
              </div>
           </div>
           
           {(gameState.checkmate || gameState.stalemate) && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/20 backdrop-blur-2xl p-8">
                <div className="bg-white p-12 rounded-[3rem] shadow-2xl text-center space-y-10 max-w-lg w-full border border-slate-200">
-                  <h1 className="text-6xl font-game leading-tight tracking-tighter text-slate-950">
+                  <h1 className="text-6xl font-black italic tracking-tighter text-slate-950">
                     {gameState.checkmate ? 'CONCLUDED' : 'EQUILIBRIUM'}
                   </h1>
                   <p className="text-slate-400 uppercase tracking-[0.8em] text-[10px] font-black">
                     {gameState.checkmate 
-                      ? `${gameState.turn === 'w' ? 'EMBER LEGION' : 'GLACIAL ORDER'} SUPREME` 
+                      ? `${gameState.turn === 'w' ? 'EMBER LEGION' : 'GLACIAL ORDER'} HAS FALLEN` 
                       : 'TACTICAL STALEMATE REACHED'}
                   </p>
                   <div className="flex flex-col gap-4">
-                    <button 
-                      onClick={resetGame}
-                      className="bg-slate-950 text-white px-12 py-6 rounded-2xl font-black uppercase tracking-widest hover:scale-[1.05] active:scale-95 transition-all shadow-2xl w-full"
-                    >
-                      Rematch
-                    </button>
-                    <button 
-                      onClick={() => {
-                        setScreen(Screen.HOME);
-                        window.location.hash = '';
-                      }}
-                      className="bg-slate-100 text-slate-600 px-12 py-6 rounded-2xl font-black uppercase tracking-widest hover:bg-slate-200 transition-all w-full border border-slate-200"
-                    >
-                      Withdraw
-                    </button>
+                    <button onClick={resetGame} className="bg-slate-950 text-white px-12 py-6 rounded-2xl font-black uppercase tracking-widest hover:scale-[1.05] active:scale-95 transition-all shadow-2xl w-full">Rematch</button>
+                    <button onClick={() => setScreen(Screen.HOME)} className="bg-slate-100 text-slate-600 px-12 py-6 rounded-2xl font-black uppercase tracking-widest hover:bg-slate-200 transition-all w-full border border-slate-200">Withdraw</button>
                   </div>
                </div>
             </div>
           )}
 
-          <button 
-            onClick={() => {
-              setScreen(Screen.HOME);
-              window.location.hash = '';
-            }}
-            className="fixed top-8 right-8 bg-white/40 hover:bg-white w-12 h-12 flex items-center justify-center rounded-full border border-slate-200 transition-all backdrop-blur-xl z-50 text-slate-400 shadow-xl active:scale-90"
-          >
+          <button onClick={() => setScreen(Screen.HOME)} className="fixed top-8 right-8 bg-white/40 hover:bg-white w-12 h-12 flex items-center justify-center rounded-full border border-slate-200 transition-all backdrop-blur-xl z-50 text-slate-400 shadow-xl active:scale-90">
             <span className="text-xl">✕</span>
           </button>
         </div>
@@ -257,7 +210,7 @@ const App: React.FC = () => {
            <button onClick={() => setScreen(Screen.HOME)} className="mb-16 text-slate-400 hover:text-slate-950 uppercase tracking-[0.5em] text-[10px] font-black flex items-center gap-3">
              <span className="text-xl">←</span> Return
            </button>
-           <h1 className="text-6xl md:text-8xl font-game mb-20 text-slate-950 tracking-tighter">Tactical Arenas</h1>
+           <h1 className="text-6xl md:text-8xl font-black italic mb-20 text-slate-950 tracking-tighter">Tactical Arenas</h1>
            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
              {ARENAS.map(a => (
                <div 
@@ -268,7 +221,7 @@ const App: React.FC = () => {
                  }}
                  className={`p-12 border-2 rounded-[3rem] cursor-pointer transition-all duration-500 ${progress.selectedArena === a.id ? 'bg-white border-blue-500 shadow-2xl scale-[1.05]' : 'bg-white/50 border-slate-100 hover:border-slate-300'}`}
                >
-                 <h2 className="text-3xl font-game mb-6 text-slate-950">{a.name}</h2>
+                 <h2 className="text-3xl font-black italic mb-6 text-slate-950">{a.name}</h2>
                  <p className="text-slate-400 text-sm leading-relaxed mb-10 font-medium">{a.description}</p>
                  <div className="w-full h-1 bg-slate-100 rounded-full">
                    {progress.selectedArena === a.id && <div className="h-full bg-blue-500 rounded-full shadow-[0_0_15px_#3b82f6]" style={{ width: '100%' }} />}

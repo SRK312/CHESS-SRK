@@ -3,36 +3,30 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chess Clash: Elemental Rift</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Elemental Clash Chess: Fire vs Ice</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@300;400;600;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         body {
             margin: 0;
             padding: 0;
             overflow: hidden;
-            background-color: #f8fafc;
+            background-color: #020617;
             font-family: 'Inter', sans-serif;
-            color: #0f172a;
-        }
-        .font-game {
-            font-family: 'Cinzel', serif;
+            color: #ffffff;
+            user-select: none;
         }
         canvas {
             display: block;
             touch-action: none;
         }
-        /* Custom scrollbar for game history */
         .scrollbar-hide::-webkit-scrollbar {
             display: none;
         }
-        .scrollbar-thin::-webkit-scrollbar {
-            width: 4px;
-        }
-        .scrollbar-thumb-white\/10::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
     </style>
 <script type="importmap">
