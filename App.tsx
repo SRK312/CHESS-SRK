@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Screen, PlayerProgress, GameState, Move, Color } from './types';
 import { INITIAL_PROGRESS, INITIAL_BOARD, ARENAS } from './constants';
 import { loadProgress, saveProgress } from './services/storage';
@@ -7,14 +7,9 @@ import { ChessEngine } from './services/ChessEngine';
 import MainMenu from './components/MainMenu';
 import ChessBoard from './components/ChessBoard';
 
-const App: React.FC = () => {
-  const [screen, setScreen] = useState<Screen>(Screen.HOME);
-  const [progress, setProgress] = useState<PlayerProgress>(INITIAL_PROGRESS);
-  const [redoStack, setRedoStack] = useState<Move[]>([]);
-  const [showShareToast, setShowShareToast] = useState(false);
-
-  // Define helper functions before they are used in state/effects
-  const createInitialState = (): GameState => ({
+// Hoisted helper functions to ensure availability and avoid re-renders
+function createInitialState(): GameState {
+  return {
     board: JSON.parse(JSON.stringify(INITIAL_BOARD)),
     turn: 'w',
     lastMove: null,
@@ -27,59 +22,70 @@ const App: React.FC = () => {
       b: { kingSide: true, queenSide: true }
     },
     enPassantTarget: null
-  });
+  };
+}
 
-  const processMove = (state: GameState, move: Move): GameState => {
-    const nextBoard = ChessEngine.applyMove(state.board, move);
-    const nextTurn: Color = state.turn === 'w' ? 'b' : 'w';
+function processMove(state: GameState, move: Move): GameState {
+  const nextBoard = ChessEngine.applyMove(state.board, move);
+  const nextTurn: Color = state.turn === 'w' ? 'b' : 'w';
 
-    const nextRights = JSON.parse(JSON.stringify(state.castlingRights));
-    if (move.piece.type === 'k') {
-      nextRights[state.turn] = { kingSide: false, queenSide: false };
-    }
-    if (move.piece.type === 'r') {
-      if (move.from.col === 0) nextRights[state.turn].queenSide = false;
-      if (move.from.col === 7) nextRights[state.turn].kingSide = false;
-    }
+  const nextRights = JSON.parse(JSON.stringify(state.castlingRights));
+  if (move.piece.type === 'k') {
+    nextRights[state.turn] = { kingSide: false, queenSide: false };
+  }
+  if (move.piece.type === 'r') {
+    if (move.from.col === 0) nextRights[state.turn].queenSide = false;
+    if (move.from.col === 7) nextRights[state.turn].kingSide = false;
+  }
 
-    let nextEPT: any = null;
-    if (move.piece.type === 'p' && Math.abs(move.to.row - move.from.row) === 2) {
-      nextEPT = { row: (move.from.row + move.to.row) / 2, col: move.from.col };
-    }
+  let nextEPT: any = null;
+  if (move.piece.type === 'p' && Math.abs(move.to.row - move.from.row) === 2) {
+    nextEPT = { row: (move.from.row + move.to.row) / 2, col: move.from.col };
+  }
 
-    const nextState: GameState = {
-      ...state,
-      board: nextBoard,
-      turn: nextTurn,
-      lastMove: move,
-      history: [...state.history, move],
-      castlingRights: nextRights,
-      enPassantTarget: nextEPT
-    };
-
-    const status = ChessEngine.getGameStatus(nextState);
-    return { ...nextState, ...status };
+  const nextState: GameState = {
+    ...state,
+    board: nextBoard,
+    turn: nextTurn,
+    lastMove: move,
+    history: [...state.history, move],
+    castlingRights: nextRights,
+    enPassantTarget: nextEPT
   };
 
+  const status = ChessEngine.getGameStatus(nextState);
+  return { ...nextState, ...status };
+}
+
+const App: React.FC = () => {
+  const [screen, setScreen] = useState<Screen>(Screen.HOME);
+  const [progress, setProgress] = useState<PlayerProgress>(loadProgress);
+  const [redoStack, setRedoStack] = useState<Move[]>([]);
+  const [showShareToast, setShowShareToast] = useState(false);
   const [gameState, setGameState] = useState<GameState>(createInitialState);
 
-  // Handle URL Sharing / Invitation Link
+  // Handle URL Sharing / Invitation Link with Robust Parsing
   useEffect(() => {
     const hash = window.location.hash.substring(1);
-    if (hash) {
-      try {
-        const decoded = atob(hash);
-        const moveStrings = decoded.split('|').filter(Boolean);
-        let newState = createInitialState();
+    if (!hash) return;
+
+    try {
+      // decodeURIComponent ensures we handle encoded Base64 characters properly
+      const decoded = atob(decodeURIComponent(hash));
+      const moveStrings = decoded.split('|').filter(Boolean);
+      let newState = createInitialState();
+      
+      moveStrings.forEach(moveStr => {
+        const parts = moveStr.split('-');
+        if (parts.length !== 2) return;
         
-        moveStrings.forEach(moveStr => {
-          const parts = moveStr.split('-');
-          if (parts.length !== 2) return;
-          const [f, t] = parts;
-          const from = { row: parseInt(f[1]), col: f.charCodeAt(0) - 97 };
-          const to = { row: parseInt(t[1]), col: t.charCodeAt(0) - 97 };
-          const piece = newState.board[from.row]?.[from.col];
-          
+        const [f, t] = parts;
+        // Chess rank '1' is index 0
+        const from = { row: parseInt(f[1]) - 1, col: f.charCodeAt(0) - 97 };
+        const to = { row: parseInt(t[1]) - 1, col: t.charCodeAt(0) - 97 };
+        
+        if (from.row >= 0 && from.row < 8 && from.col >= 0 && from.col < 8) {
+          const piece = newState.board[from.row][from.col];
           if (piece) {
             const legalMoves = ChessEngine.getLegalMoves(newState, from);
             const valid = legalMoves.find(m => m.to.row === to.row && m.to.col === to.col);
@@ -87,24 +93,23 @@ const App: React.FC = () => {
               newState = processMove(newState, valid);
             }
           }
-        });
-        
-        setGameState(newState);
-        setScreen(Screen.PLAYING);
-      } catch (e) {
-        console.error("Failed to parse invitation link", e);
-      }
+        }
+      });
+      
+      setGameState(newState);
+      setScreen(Screen.PLAYING);
+    } catch (e) {
+      console.error("Critical error parsing invitation link:", e);
+      // Fail gracefully and clear hash to prevent infinite white screen loops
+      window.location.hash = '';
     }
-    
-    const saved = loadProgress();
-    setProgress(prev => ({ ...prev, ...saved }));
   }, []);
 
   useEffect(() => {
     saveProgress(progress);
   }, [progress]);
 
-  const handleMove = (move: Move) => {
+  const handleMove = useCallback((move: Move) => {
     const legalMoves = ChessEngine.getLegalMoves(gameState, move.from);
     const validMove = legalMoves.find(m => m.to.row === move.to.row && m.to.col === move.to.col);
     if (!validMove) return;
@@ -123,16 +128,17 @@ const App: React.FC = () => {
     } else if (nextState.stalemate) {
        setProgress(p => ({ ...p, draws: p.draws + 1, coins: p.coins + 50 }));
     }
-  };
+  }, [gameState]);
 
   const handleShare = () => {
     const moveHistory = gameState.history.map(m => {
-      const f = `${String.fromCharCode(97 + m.from.col)}${m.from.row}`;
-      const t = `${String.fromCharCode(97 + m.to.col)}${m.to.row}`;
+      // Convert internal row index 0-7 back to chess rank 1-8
+      const f = `${String.fromCharCode(97 + m.from.col)}${m.from.row + 1}`;
+      const t = `${String.fromCharCode(97 + m.to.col)}${m.to.row + 1}`;
       return `${f}-${t}`;
     }).join('|');
     
-    const encoded = btoa(moveHistory);
+    const encoded = encodeURIComponent(btoa(moveHistory));
     const url = `${window.location.origin}${window.location.pathname}#${encoded}`;
     
     navigator.clipboard.writeText(url).then(() => {

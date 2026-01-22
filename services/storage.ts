@@ -2,13 +2,14 @@
 import { PlayerProgress } from '../types';
 import { INITIAL_PROGRESS } from '../constants';
 
-const SAVE_KEY = 'zen_archery_save';
+const SAVE_KEY = 'chess_clash_elemental_save';
 
 export const loadProgress = (): PlayerProgress => {
   const saved = localStorage.getItem(SAVE_KEY);
   if (!saved) return INITIAL_PROGRESS;
   try {
-    return { ...INITIAL_PROGRESS, ...JSON.parse(saved) };
+    const parsed = JSON.parse(saved);
+    return { ...INITIAL_PROGRESS, ...parsed };
   } catch {
     return INITIAL_PROGRESS;
   }

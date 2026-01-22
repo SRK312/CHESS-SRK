@@ -34,10 +34,10 @@ export interface Arena {
   name: string;
   color: string;
   description: string;
-  skyColor: number; // Hex number for Three.js
+  skyColor: number;
 }
 
-/* Added Blade, GameStats, and Character types to resolve import errors in components */
+// Added Blade interface for the equipment system
 export interface Blade {
   id: string;
   name: string;
@@ -46,13 +46,7 @@ export interface Blade {
   trailWidth: number;
 }
 
-export interface GameStats {
-  score: number;
-  combo: number;
-  maxCombo: number;
-  fruitsSliced: number;
-}
-
+// Added Character interface for the character selection system
 export interface Character {
   id: string;
   name: string;
@@ -65,14 +59,22 @@ export interface Character {
   };
 }
 
+// Added GameStats interface for tracking performance in training/gameplay sessions
+export interface GameStats {
+  score: number;
+  combo: number;
+  maxCombo: number;
+  fruitsSliced: number;
+}
+
+// Updated PlayerProgress to include tracking for unlocked items and selection states
 export interface PlayerProgress {
   wins: number;
   losses: number;
   draws: number;
+  coins: number;
   unlockedArenas: string[];
   selectedArena: string;
-  /* Additional fields required by CharacterSelect and Shop components */
-  coins: number;
   unlockedBlades: string[];
   selectedBlade: string;
   unlockedCharacters: string[];
