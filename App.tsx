@@ -7,7 +7,7 @@ import { ChessEngine } from './services/ChessEngine';
 import MainMenu from './components/MainMenu';
 import ChessBoard from './components/ChessBoard';
 
-// Hoisted helper functions to ensure availability and avoid re-renders
+// Logic moved outside the component to prevent initialization cycles and hoisting errors
 function createInitialState(): GameState {
   return {
     board: JSON.parse(JSON.stringify(INITIAL_BOARD)),
@@ -59,18 +59,17 @@ function processMove(state: GameState, move: Move): GameState {
 
 const App: React.FC = () => {
   const [screen, setScreen] = useState<Screen>(Screen.HOME);
-  const [progress, setProgress] = useState<PlayerProgress>(loadProgress);
+  const [progress, setProgress] = useState<PlayerProgress>(() => loadProgress());
   const [redoStack, setRedoStack] = useState<Move[]>([]);
   const [showShareToast, setShowShareToast] = useState(false);
   const [gameState, setGameState] = useState<GameState>(createInitialState);
 
-  // Handle URL Sharing / Invitation Link with Robust Parsing
+  // Handle Invitation Link safely
   useEffect(() => {
     const hash = window.location.hash.substring(1);
     if (!hash) return;
 
     try {
-      // decodeURIComponent ensures we handle encoded Base64 characters properly
       const decoded = atob(decodeURIComponent(hash));
       const moveStrings = decoded.split('|').filter(Boolean);
       let newState = createInitialState();
@@ -80,7 +79,7 @@ const App: React.FC = () => {
         if (parts.length !== 2) return;
         
         const [f, t] = parts;
-        // Chess rank '1' is index 0
+        // Internal index is 0-7, chess rank is 1-8
         const from = { row: parseInt(f[1]) - 1, col: f.charCodeAt(0) - 97 };
         const to = { row: parseInt(t[1]) - 1, col: t.charCodeAt(0) - 97 };
         
@@ -99,8 +98,7 @@ const App: React.FC = () => {
       setGameState(newState);
       setScreen(Screen.PLAYING);
     } catch (e) {
-      console.error("Critical error parsing invitation link:", e);
-      // Fail gracefully and clear hash to prevent infinite white screen loops
+      console.error("Link parsing failed:", e);
       window.location.hash = '';
     }
   }, []);
@@ -132,7 +130,6 @@ const App: React.FC = () => {
 
   const handleShare = () => {
     const moveHistory = gameState.history.map(m => {
-      // Convert internal row index 0-7 back to chess rank 1-8
       const f = `${String.fromCharCode(97 + m.from.col)}${m.from.row + 1}`;
       const t = `${String.fromCharCode(97 + m.to.col)}${m.to.row + 1}`;
       return `${f}-${t}`;

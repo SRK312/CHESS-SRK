@@ -37,29 +37,7 @@ export interface Arena {
   skyColor: number;
 }
 
-// Added Blade interface for the equipment system
-export interface Blade {
-  id: string;
-  name: string;
-  color: string;
-  cost: number;
-  trailWidth: number;
-}
-
-// Added Character interface for the character selection system
-export interface Character {
-  id: string;
-  name: string;
-  description: string;
-  ability: string;
-  cost: number;
-  passiveBonus: {
-    windHandling: number;
-    steadiness: number;
-  };
-}
-
-// Added GameStats interface for tracking performance in training/gameplay sessions
+// Fix: Added GameStats for GameCanvas
 export interface GameStats {
   score: number;
   combo: number;
@@ -67,7 +45,28 @@ export interface GameStats {
   fruitsSliced: number;
 }
 
-// Updated PlayerProgress to include tracking for unlocked items and selection states
+// Fix: Added Blade for Shop and GameCanvas
+export interface Blade {
+  id: string;
+  name: string;
+  color: string;
+  trailWidth: number;
+  cost: number;
+}
+
+// Fix: Added Character for CharacterSelect
+export interface Character {
+  id: string;
+  name: string;
+  ability: string;
+  description: string;
+  passiveBonus: {
+    windHandling: number;
+    steadiness: number;
+  };
+  cost: number;
+}
+
 export interface PlayerProgress {
   wins: number;
   losses: number;
@@ -75,10 +74,11 @@ export interface PlayerProgress {
   coins: number;
   unlockedArenas: string[];
   selectedArena: string;
-  unlockedBlades: string[];
-  selectedBlade: string;
+  // Fix: Added missing properties for character and blade selection
   unlockedCharacters: string[];
   selectedCharacter: string;
+  unlockedBlades: string[];
+  selectedBlade: string;
 }
 
 export interface CastlingRights {
